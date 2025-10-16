@@ -2,9 +2,10 @@ import json
 import os
 import sys
 from typing import Any, Dict
+
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
-from helpers.weather.index import make_weather_request
+from helpers.weather.index import make_weather_request, weather_code_to_string
 
 load_dotenv()
 
@@ -28,21 +29,41 @@ weather_mcp = FastMCP(
 
 @weather_mcp.tool()
 async def get_current_location_weather(city: str) -> Dict[str, Any]:
-    """Get current weather for a location."""
+    """Get current weather for a location and format it into a descriptive string.
 
+    Args:
+        city: Name of the city to get weather for
+
+    Returns:
+        Dict[str, Any]: A formatted json with the weather information containing text and raw data or error message
+    """
     url = (
         f"{TOMORROW_IO_BASE_URL}/realtime?location={city}&apikey={TOMORROW_IO_API_KEY}"
     )
 
     try:
         weather_data = await make_weather_request(url)
+        values = weather_data["data"]["values"]
+
+        temp_c = values.get("temperature", "N/A")
+        code = values.get("weatherCode", 0)
+        condition = weather_code_to_string(code)
+        wind_speed = values.get("windSpeed", "N/A")
+        humidity = values.get("humidity", "N/A")
+
+        formatted_output = (
+            f"The current weather in {city} is {condition}.\n"
+            f"Temperature: {temp_c}°C.\n"
+            f"Wind Speed: {wind_speed} m/s.\n"
+            f"Humidity: {humidity}%."
+        )
+
+        return {
+            "text": formatted_output,
+            "raw": weather_data,
+        }
+
+    except KeyError as e:
+        return f"ERROR: Weather data was retrieved but had an unexpected structure: {str(e)}"
     except Exception as e:
-
-        print(f"Error fetching weather data for {city}: {e}", file=sys.stderr)
-
-        return {"error": f"Internal API request failed: {type(e).__name__}"}
-
-    if not weather_data:
-        return {"error": "Unable to fetch the current weather or received empty data"}
-
-    return json.loads(json.dumps(weather_data))
+        return f"CRITICAL ERROR: Failed to process weather data: {type(e).__name__} - {str(e)}"
