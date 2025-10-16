@@ -1,0 +1,22 @@
+import contextlib
+from fastapi import FastAPI
+
+from weather_server import weather_mcp
+
+
+# lifespan significa eventos que rodam durate a ainicialização e encerramento do app
+@contextlib.asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with contextlib.AsyncExitStack() as stack:
+        await stack.enter_async_context(weather_mcp.session_manager.run())
+        yield
+
+
+app = FastAPI(lifespan=lifespan)
+app.mount("/weather", weather_mcp.streamable_http_app())
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)
