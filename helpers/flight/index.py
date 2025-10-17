@@ -35,10 +35,10 @@ async def make_cheap_flight_request(
         "x-rapidapi-host": "flights-search3.p.rapidapi.com",
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=60.0) as client:
         try:
             response = await client.get(
-                RAPID_BASE_URL, headers=headers, params=querystring, timeout=30.0
+                RAPID_BASE_URL, headers=headers, params=querystring
             )
             response.raise_for_status()
             return response.json()

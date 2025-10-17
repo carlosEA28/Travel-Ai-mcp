@@ -49,12 +49,31 @@ async def get_flight_info(
         if not flight_data:
             return "CRITICAL ERROR: No data returned from the flight API."
 
-        # Checa se a chave 'data' existe
         if "data" not in flight_data or "itineraries" not in flight_data["data"]:
             return f"CRITICAL ERROR: Unexpected API response structure: {flight_data}"
 
-        values = flight_data["data"]["itineraries"]
-        return values
+        itineraries = flight_data["data"]["itineraries"]
+        results = [f"Here are the flights from {from_city} to {to_city}:\n"]
+
+        for itinerary in itineraries:
+            price = itinerary.get("price", {}).get("formatted", "N/A")
+            for leg in itinerary.get("legs", []):
+                origin = leg["origin"]["city"]
+                dest = leg["destination"]["city"]
+                depart = leg["departure"]
+                arrive = leg["arrival"]
+                stops = leg.get("stopCount", 0)
+                carriers = ", ".join(
+                    [c["name"] for c in leg.get("carriers", {}).get("marketing", [])]
+                )
+
+                results.append(
+                    f"- Flight from {origin} to {dest}, "
+                    f"Departure: {depart}, Arrival: {arrive}, "
+                    f"Stops: {stops}, Airlines: {carriers}, Price: {price}"
+                )
+
+        return "\n".join(results)
 
     except Exception as e:
         return f"CRITICAL ERROR: Failed to process flight data: {type(e).__name__} - {str(e)}"
