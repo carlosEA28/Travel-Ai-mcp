@@ -1,6 +1,7 @@
 import contextlib
 from fastapi import FastAPI
 
+from flight_server import flight_mcp
 from weather_server import weather_mcp
 
 
@@ -9,11 +10,13 @@ from weather_server import weather_mcp
 async def lifespan(app: FastAPI):
     async with contextlib.AsyncExitStack() as stack:
         await stack.enter_async_context(weather_mcp.session_manager.run())
+        await stack.enter_async_context(flight_mcp.session_manager.run())
         yield
 
 
 app = FastAPI(lifespan=lifespan)
 app.mount("/weather", weather_mcp.streamable_http_app())
+app.mount("/flight", flight_mcp.streamable_http_app())
 
 
 if __name__ == "__main__":

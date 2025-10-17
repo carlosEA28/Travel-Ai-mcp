@@ -1,4 +1,3 @@
-import json
 import os
 import sys
 from typing import Any, Dict
@@ -17,6 +16,7 @@ TOMORROW_IO_BASE_URL = os.getenv("TOMORROW_IO_BASE_URL")
 TOMORROW_IO_API_KEY = os.getenv("TOMORROW_IO_API_KEY")
 
 
+# tratar melhor o erro
 if not TOMORROW_IO_BASE_URL or not TOMORROW_IO_API_KEY:
     print(
         "FATAL ERROR: Environment variables TOMORROW_IO_BASE_URL and/or TOMORROW_IO_API_KEY are not set in the .env file."
