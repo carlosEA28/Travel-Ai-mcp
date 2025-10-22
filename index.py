@@ -5,6 +5,8 @@ from weather_server import weather_mcp
 
 from fastapi.middleware.cors import CORSMiddleware
 
+PORT = os.getenv("PORT", 8000)
+
 
 # lifespan significa eventos que rodam durate a ainicialização e encerramento do app
 @contextlib.asynccontextmanager
