@@ -1,6 +1,6 @@
 import contextlib
 from fastapi import FastAPI
-
+import os
 from weather_server import weather_mcp
 
 from fastapi.middleware.cors import CORSMiddleware
