@@ -5,7 +5,6 @@ from typing import Any, Dict
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 from helpers.weather.index import (
-    make_forecast_request,
     make_weather_request,
     weather_code_to_string,
 )
